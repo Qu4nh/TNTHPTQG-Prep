@@ -36,7 +36,7 @@ export default function Sidebar() {
       <aside className={`sidebar ${mobileOpen ? 'sidebar--open' : ''}`}>
         <div className="sidebar__brand">
           <div className="sidebar__logo">
-            <img src="/logo.png" alt="THPT Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 'var(--radius-sm)' }} />
+            <img src="/logo.svg" alt="THPT Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 'var(--radius-sm)' }} />
           </div>
           <div>
             <div className="sidebar__title">TNTHPTQG Prep</div>

@@ -1,0 +1,31 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <rect width="100" height="100" rx="24" fill="url(#bg-gradient)" />
+  
+  <!-- Left page of the book -->
+  <path d="M50 70C35 65 25 70 25 70V35C25 35 35 25 50 35V70Z" fill="white" opacity="0.95" />
+  
+  <!-- Right page of the book -->
+  <path d="M50 70C65 65 75 70 75 70V35C75 35 65 25 50 35V70Z" fill="white" opacity="0.85" />
+  
+  <!-- Center fold -->
+  <path d="M50 35V70" stroke="url(#bg-gradient)" stroke-width="4" stroke-linecap="round" />
+  
+  <!-- Spark / Upward Arrow -->
+  <path d="M50 15L58 35L50 28L42 35L50 15Z" fill="#FBBF24" />
+  <circle cx="68" cy="22" r="4" fill="#FCD34D" />
+  <circle cx="32" cy="22" r="3" fill="#FCD34D" opacity="0.8" />
+  
+  <!-- Decorative lines on pages -->
+  <path d="M35 45H42" stroke="url(#bg-gradient)" stroke-width="3" stroke-linecap="round" opacity="0.4" />
+  <path d="M35 55H42" stroke="url(#bg-gradient)" stroke-width="3" stroke-linecap="round" opacity="0.4" />
+  <path d="M58 45H65" stroke="url(#bg-gradient)" stroke-width="3" stroke-linecap="round" opacity="0.4" />
+  <path d="M58 55H65" stroke="url(#bg-gradient)" stroke-width="3" stroke-linecap="round" opacity="0.4" />
+
+  <defs>
+    <linearGradient id="bg-gradient" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB" />
+      <stop offset="1" stop-color="#7C3AED" />
+    </linearGradient>
+  </defs>
+</svg>
