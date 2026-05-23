@@ -2,7 +2,21 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { KNOWLEDGE_BASE } from '../data/knowledgeBase';
 
 const getApiKey = () => {
-  return localStorage.getItem('gemini_api_key');
+  let key = localStorage.getItem('gemini_api_key');
+  if (key) return key;
+
+  try {
+    const settingsStr = localStorage.getItem('settings');
+    if (settingsStr) {
+      const settings = JSON.parse(settingsStr);
+      if (settings?.geminiApiKey) {
+        return settings.geminiApiKey;
+      }
+    }
+  } catch (e) {
+    console.error('Error parsing settings:', e);
+  }
+  return null;
 };
 
 const blobUrlToBase64 = async (blobUrl) => {
@@ -32,7 +46,7 @@ export const generateOverallAnalysis = async (examResult, subjectId) => {
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ 
-    model: 'gemini-3.0-flash',
+    model: 'gemini-3-flash',
     generationConfig: {
       temperature: 0.1,
       topK: 32,
@@ -80,10 +94,10 @@ export const generateQuestionExplanation = async (questionObj, subjectId, pdfBlo
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  // Dùng gemini-3.0-flash: Phiên bản tối tân nhất, thông minh vượt trội, tư duy toán học xuất sắc nhưng vẫn giữ quota Free Tier siêu hào phóng.
+  // Dùng gemini-3-flash: Phiên bản tối tân nhất, thông minh vượt trội, tư duy toán học xuất sắc nhưng vẫn giữ quota Free Tier siêu hào phóng.
   // Nhiệt độ thấp (0.1) giúp AI trả lời chính xác, logic, tránh "ảo giác" trong toán học.
   const model = genAI.getGenerativeModel({ 
-    model: 'gemini-3.0-flash',
+    model: 'gemini-3-flash',
     generationConfig: {
       temperature: 0.1,
       topK: 32,

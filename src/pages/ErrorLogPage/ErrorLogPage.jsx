@@ -95,6 +95,14 @@ export default function ErrorLogPage() {
   const handleGenerateQuestionAnalysis = async (q) => {
     let apiKey = localStorage.getItem('gemini_api_key');
     if (!apiKey) {
+      try {
+        const settings = JSON.parse(localStorage.getItem('settings'));
+        if (settings?.geminiApiKey) {
+          apiKey = settings.geminiApiKey;
+        }
+      } catch (e) {}
+    }
+    if (!apiKey) {
       apiKey = window.prompt('Để sử dụng AI, vui lòng nhập Google Gemini API Key của bạn:\n(Hoàn toàn miễn phí, bạn có thể lấy tại aistudio.google.com)');
       if (apiKey) {
         localStorage.setItem('gemini_api_key', apiKey.trim());
