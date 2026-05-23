@@ -39,3 +39,6 @@ build/
 
 # Markdown Files (As requested by user: "Các file md... không cần push")
 *.md
+
+# Ignore the .gitignore file itself
+.gitignore
