@@ -1,3 +1,5 @@
+
+
 /**
  * Exam configuration based on latest THPTQG 2025 structure.
  * Source: Bộ GD&ĐT - Cấu trúc đề thi từ 2025.
@@ -14,7 +16,7 @@ export const SUBJECTS = {
   math: {
     id: 'math',
     name: 'Toán',
-    icon: '📐',
+    icon: '/math.png',
     color: 'var(--color-math)',
     colorLight: 'var(--color-math-light)',
     colorBg: 'var(--color-math-bg)',
@@ -58,7 +60,7 @@ export const SUBJECTS = {
   physics: {
     id: 'physics',
     name: 'Vật lý',
-    icon: '⚛️',
+    icon: '/physics.png',
     color: 'var(--color-physics)',
     colorLight: 'var(--color-physics-light)',
     colorBg: 'var(--color-physics-bg)',
@@ -102,7 +104,7 @@ export const SUBJECTS = {
   english: {
     id: 'english',
     name: 'Tiếng Anh',
-    icon: '🌍',
+    icon: '/english.png',
     color: 'var(--color-english)',
     colorLight: 'var(--color-english-light)',
     colorBg: 'var(--color-english-bg)',

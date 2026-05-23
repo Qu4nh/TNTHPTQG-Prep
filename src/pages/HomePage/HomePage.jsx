@@ -186,7 +186,10 @@ export default function HomePage() {
               onClick={() => handleStartExam(subject.id)}
             >
               <div className="subject-card__header">
-                <span className="subject-card__icon">{subject.icon}</span>
+                <span 
+                  className="subject-card__icon" 
+                  style={{ backgroundImage: `url(${subject.icon})`, backgroundSize: '145%', backgroundPosition: 'center', borderRadius: 'inherit' }}
+                ></span>
                 <div>
                   <h3 className="subject-card__name">{subject.name}</h3>
                   <div className="subject-card__meta">

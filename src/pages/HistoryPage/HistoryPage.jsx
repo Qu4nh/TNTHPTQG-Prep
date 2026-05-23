@@ -101,8 +101,9 @@ export default function HistoryPage() {
                     return (
                       <tr key={stat.subjectId}>
                         <td>
-                          <div className="summary-table__subject" style={{ color: sub?.color || 'var(--text-primary)' }}>
-                            {sub?.icon} {stat.subjectName}
+                          <div className="summary-table__subject" style={{ color: sub?.color || 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                            {sub?.icon && <span style={{ display: 'inline-block', width: 20, height: 20, backgroundImage: `url(${sub.icon})`, backgroundSize: '145%', backgroundPosition: 'center', borderRadius: '4px' }}></span>}
+                            {stat.subjectName}
                           </div>
                         </td>
                         <td className="text-center font-mono font-bold">{stat.totalExams}</td>
@@ -187,9 +188,12 @@ export default function HistoryPage() {
                         style={{
                           background: sub?.colorBg,
                           color: sub?.color?.replace('var(', '').replace(')', ''),
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px'
                         }}
                       >
-                        {sub?.icon} {r.subjectName}
+                        {sub?.icon && <span style={{ display: 'inline-block', width: 18, height: 18, backgroundImage: `url(${sub.icon})`, backgroundSize: '145%', backgroundPosition: 'center', borderRadius: '4px' }}></span>} {r.subjectName}
                       </span>
                     </td>
                     <td className="history-table__exam">{r.examName}</td>

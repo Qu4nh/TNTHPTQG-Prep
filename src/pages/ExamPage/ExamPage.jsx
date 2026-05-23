@@ -98,7 +98,10 @@ export default function ExamPage() {
             <ChevronLeft size={20} />
           </button>
           <div>
-            <h1 className="exam-page__title">{subject.icon} {subject.name} — {currentExam.name}</h1>
+            <h1 className="exam-page__title">
+              <span className="exam-page__title-icon" style={{ display: 'inline-block', width: 28, height: 28, backgroundImage: `url(${subject.icon})`, backgroundSize: '145%', backgroundPosition: 'center', verticalAlign: 'text-bottom', marginRight: '8px', borderRadius: '6px' }}></span>
+              {subject.name} — {currentExam.name}
+            </h1>
           </div>
         </div>
 
