@@ -6,7 +6,7 @@ import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
-import { Trophy, Target, Clock, TrendingUp, Brain, ChevronLeft, Sparkles, X, Filter } from 'lucide-react';
+import { Trophy, Target, Clock, TrendingUp, Brain, ChevronLeft, Sparkles, X, Filter, RotateCw } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { generateOverallAnalysis, generateQuestionExplanation } from '../../services/aiService';
 import { loadPdf, loadAiCache, saveAiCache } from '../../services/localDbService';
@@ -23,7 +23,7 @@ export default function ReviewPage() {
   const { subjectId, examId } = useParams();
   const navigate = useNavigate();
   const history = useHistoryStore((s) => s.history);
-  
+
   const [hasStartedAnalysis, setHasStartedAnalysis] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
@@ -31,11 +31,50 @@ export default function ReviewPage() {
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [questionAnalysis, setQuestionAnalysis] = useState('');
   const [questionAiLoading, setQuestionAiLoading] = useState(false);
-  
+
   const [filter, setFilter] = useState('all');
 
   // Cached PDF URL from IndexedDB
   const [cachedPdfUrl, setCachedPdfUrl] = useState(null);
+  const [loadingStatus, setLoadingStatus] = useState('Đang kết nối với Gemini AI...');
+  const [overallLoadingStatus, setOverallLoadingStatus] = useState('Đang kết nối với Gemini AI...');
+
+  useEffect(() => {
+    if (!questionAiLoading) return;
+    const statuses = [
+      'Đang đọc và phân tích đề bài từ PDF...',
+      'Đang đối chiếu phương án trả lời...',
+      'Đang tính toán lời giải chi tiết từng bước...',
+      'Đang xác định lỗi tư duy thường gặp...',
+      'Đang tối ưu hóa phương pháp giải nhanh...',
+      'Đang định hình khung kiến thức ôn tập...'
+    ];
+    let idx = 0;
+    setLoadingStatus(statuses[0]);
+    const interval = setInterval(() => {
+      idx = (idx + 1) % statuses.length;
+      setLoadingStatus(statuses[idx]);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [questionAiLoading]);
+
+  useEffect(() => {
+    if (!aiLoading) return;
+    const statuses = [
+      'Đang thu thập điểm số và chi tiết bài thi...',
+      'Đang đối chiếu với khung kiến thức môn học...',
+      'Đang phân tích và dự đoán kỹ năng yếu...',
+      'Đang hoạch định lộ trình ôn tập tối ưu...',
+      'Đang tổng hợp lời khuyên từ chuyên gia...'
+    ];
+    let idx = 0;
+    setOverallLoadingStatus(statuses[0]);
+    const interval = setInterval(() => {
+      idx = (idx + 1) % statuses.length;
+      setOverallLoadingStatus(statuses[idx]);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [aiLoading]);
 
   // Find the latest result for this exam
   const result = history.find(
@@ -67,14 +106,14 @@ export default function ReviewPage() {
 
   // Real AI analysis for Overall
   const handleGenerateAiAnalysis = async (examResult) => {
-    let apiKey = localStorage.getItem('gemini_api_key');
+    let apiKey = localStorage.getItem('gemini_api_key') || localStorage.getItem('thpt_gemini_api_key');
     if (!apiKey) {
       try {
-        const settings = JSON.parse(localStorage.getItem('settings'));
+        const settings = JSON.parse(localStorage.getItem('thpt_settings') || localStorage.getItem('settings'));
         if (settings?.geminiApiKey) {
           apiKey = settings.geminiApiKey;
         }
-      } catch (e) {}
+      } catch (e) { }
     }
     if (!apiKey) {
       apiKey = window.prompt('Để sử dụng AI, vui lòng nhập Google Gemini API Key của bạn:\n(Hoàn toàn miễn phí, bạn có thể lấy tại aistudio.google.com)');
@@ -88,9 +127,10 @@ export default function ReviewPage() {
     setHasStartedAnalysis(true);
     setAiLoading(true);
     setAiAnalysis('');
-    
+
     try {
-      const resultText = await generateOverallAnalysis(examResult, subjectId);
+      const pdfUrl = cachedPdfUrl || sessionStorage.getItem('current_pdf');
+      const resultText = await generateOverallAnalysis(examResult, subjectId, pdfUrl);
       setAiAnalysis(resultText);
 
       // Save to IndexedDB cache
@@ -104,14 +144,14 @@ export default function ReviewPage() {
   };
 
   const handleGenerateQuestionAnalysis = async (q) => {
-    let apiKey = localStorage.getItem('gemini_api_key');
+    let apiKey = localStorage.getItem('gemini_api_key') || localStorage.getItem('thpt_gemini_api_key');
     if (!apiKey) {
       try {
-        const settings = JSON.parse(localStorage.getItem('settings'));
+        const settings = JSON.parse(localStorage.getItem('thpt_settings') || localStorage.getItem('settings'));
         if (settings?.geminiApiKey) {
           apiKey = settings.geminiApiKey;
         }
-      } catch (e) {}
+      } catch (e) { }
     }
     if (!apiKey) {
       apiKey = window.prompt('Để sử dụng AI, vui lòng nhập Google Gemini API Key của bạn:\n(Hoàn toàn miễn phí, bạn có thể lấy tại aistudio.google.com)');
@@ -124,7 +164,7 @@ export default function ReviewPage() {
 
     setQuestionAiLoading(true);
     setQuestionAnalysis('');
-    
+
     try {
       // Use cached PDF URL from IndexedDB, fall back to session
       const pdfUrl = cachedPdfUrl || sessionStorage.getItem('current_pdf');
@@ -172,21 +212,29 @@ export default function ReviewPage() {
     { name: 'Bỏ', value: result.totalSkipped },
   ];
 
-  const barData = Object.values(result.partScores || {}).map((part) => {
-    const total = part.total || 1;
-    return {
-      name: part.name,
-      'Đúng': Math.round((part.correct / total) * 100),
-      'Sai': Math.round((part.wrong / total) * 100),
-      'Bỏ': Math.round((part.skipped / total) * 100),
-    };
-  });
-
   const allQuestions = Object.values(result.questionResults || {}).sort((a, b) => a.questionNumber - b.questionNumber).map(q => ({
     ...q,
     isBookmarked: result.bookmarkedQuestions?.includes(q.questionNumber) || false
   }));
-  
+
+  const barData = Object.values(result.partScores || {}).map((part) => {
+    // Recalculate accurately from allQuestions to support old history data
+    const partQs = allQuestions.filter(q => q.partId === part.id || q.partName === part.name);
+    const total = partQs.length || part.total || 1;
+    const correct = partQs.filter(q => q.status === 'correct').length;
+    const partial = partQs.filter(q => q.status === 'partial').length;
+    const wrong = partQs.filter(q => q.status === 'wrong').length;
+    const skipped = partQs.filter(q => q.status === 'skipped').length;
+
+    return {
+      name: part.name,
+      'Đúng': Math.round((correct / total) * 100),
+      'Đúng một phần': Math.round((partial / total) * 100),
+      'Sai': Math.round((wrong / total) * 100),
+      'Bỏ': Math.round((skipped / total) * 100),
+    };
+  });
+
   const filteredQuestions = allQuestions.filter(q => {
     if (filter === 'all') return true;
     if (filter === 'correct') return q.status === 'correct';
@@ -254,8 +302,19 @@ export default function ReviewPage() {
 
         <div className="score-ai-box">
           <div className="score-ai-box__header">
-            <Brain size={16} />
-            <span>Đánh giá chung (AI)</span>
+            <div className="score-ai-box__header-title">
+              <Brain size={16} />
+              <span>Đánh giá chung (AI)</span>
+            </div>
+            {hasStartedAnalysis && !aiLoading && (
+              <button
+                className="ai-refresh-btn"
+                onClick={() => handleGenerateAiAnalysis(result)}
+                title="Yêu cầu AI đánh giá lại"
+              >
+                <RotateCw size={13} />
+              </button>
+            )}
           </div>
           {!hasStartedAnalysis ? (
             <div className="score-ai-box__start">
@@ -273,9 +332,16 @@ export default function ReviewPage() {
                   </ReactMarkdown>
                 </div>
               ) : (
-                <div className="ai-content__loading">
-                  <div className="animate-shimmer" style={{ height: 12, borderRadius: 6, marginBottom: 8 }} />
-                  <div className="animate-shimmer" style={{ height: 12, width: '80%', borderRadius: 6 }} />
+                <div className="ai-loading-container">
+                  <div className="ai-loading-brain">
+                    <Brain className="ai-loading-icon--brain" />
+                    <div className="ai-loading-pulse" />
+                    <Sparkles className="ai-loading-icon--sparkles" />
+                  </div>
+                  <div className="ai-loading-text-wrap">
+                    <span className="ai-loading-title">Trí tuệ nhân tạo đang phân tích bài thi</span>
+                    <span className="ai-loading-status">{overallLoadingStatus}</span>
+                  </div>
                 </div>
               )}
             </div>
@@ -318,7 +384,8 @@ export default function ReviewPage() {
               <YAxis tick={{ fontSize: 12 }} domain={[0, 100]} tickFormatter={(tick) => `${tick}%`} />
               <Tooltip formatter={(value) => `${value}%`} />
               <Legend />
-              <Bar dataKey="Đúng" fill="#10B981" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Đúng" stackId="correctGroup" fill="#10B981" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Đúng một phần" stackId="correctGroup" fill="#F59E0B" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Sai" fill="#EF4444" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Bỏ" fill="#9CA3AF" radius={[4, 4, 0, 0]} />
             </BarChart>
@@ -346,7 +413,7 @@ export default function ReviewPage() {
             </div>
           </div>
         </div>
-        
+
         <div className="table-responsive">
           <table className="review-table">
             <thead>
@@ -404,7 +471,7 @@ export default function ReviewPage() {
             <button className="modal__close" onClick={() => setSelectedQuestion(null)}>
               <X size={20} />
             </button>
-            
+
             <div className="modal__split">
               {/* Left Column: PDF Viewer */}
               <div className="modal__split-pdf">
@@ -417,7 +484,7 @@ export default function ReviewPage() {
               <div className="modal__split-details">
                 <h3 className="modal__title">Chi tiết câu {selectedQuestion.questionNumber}</h3>
                 <p className="modal__subtitle">{selectedQuestion.partName}</p>
-                
+
                 <div className="question-compare">
                   <div className="question-compare__item">
                     <span className="question-compare__label">Bạn chọn:</span>
@@ -445,18 +512,55 @@ export default function ReviewPage() {
                   ) : (
                     <div className="ai-content">
                       {questionAiLoading && (
-                        <div className="ai-content__loading">
-                          <Sparkles size={16} className="animate-spin" style={{ color: 'var(--color-math)', marginRight: '8px' }} />
-                          <span style={{ color: 'var(--color-math)', fontWeight: '500' }}>AI đang phân tích và giải thích...</span>
+                        <div className="ai-loading-container">
+                          <div className="ai-loading-brain">
+                            <Brain className="ai-loading-icon--brain" />
+                            <div className="ai-loading-pulse" />
+                            <Sparkles className="ai-loading-icon--sparkles" />
+                          </div>
+                          <div className="ai-loading-text-wrap">
+                            <span className="ai-loading-title">AI đang phân tích</span>
+                            <span className="ai-loading-status">{loadingStatus}</span>
+                          </div>
                         </div>
                       )}
-                      {questionAnalysis && (
-                        <div className="ai-content__text markdown-body">
-                          <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                            {questionAnalysis}
-                          </ReactMarkdown>
+                      {questionAnalysis && !questionAiLoading && (
+                        <div className="ai-content__header">
+                          <span className="ai-content__title">✨ Lời giải từ AI:</span>
+                          <button className="btn-ai-regenerate" onClick={() => handleGenerateQuestionAnalysis(selectedQuestion)} title="Giải thích lại bằng AI">
+                            <Brain size={16} className="btn-ai-regenerate__icon-ai" />
+                            <RotateCw size={14} className="btn-ai-regenerate__icon-refresh" />
+                          </button>
                         </div>
                       )}
+                      {questionAnalysis && !questionAiLoading && (() => {
+                        let displayAnalysis = questionAnalysis;
+                        let searchQuery = `Đề thi ${subject.name} ${result.examName} Câu ${selectedQuestion.questionNumber}`;
+                        const searchMatch = questionAnalysis.match(/SEARCH_QUERY:\s*(.*)/i);
+                        if (searchMatch) {
+                          searchQuery = searchMatch[1].trim().replace(/^["']|["']$/g, '');
+                          displayAnalysis = questionAnalysis.replace(/SEARCH_QUERY:\s*(.*)/i, '').trim();
+                        }
+
+                        return (
+                          <div className="ai-content__text markdown-body">
+                            <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                              {displayAnalysis}
+                            </ReactMarkdown>
+
+                            <div className="ai-content__actions">
+                              <a
+                                href={`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn-google-search"
+                              >
+                                🔍 Tìm kiếm câu này trên Google
+                              </a>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
                 </div>
@@ -476,8 +580,8 @@ function renderUserAnswer(q) {
       <div className="tf-answer-group">
         {Object.entries(q.statementResults).map(([label, res]) => {
           const valStr = res.userAnswer === undefined || res.userAnswer === null ? '?' : (res.userAnswer ? 'Đ' : 'S');
-          const badgeClass = res.userAnswer === undefined || res.userAnswer === null 
-            ? 'ans-badge--skipped' 
+          const badgeClass = res.userAnswer === undefined || res.userAnswer === null
+            ? 'ans-badge--skipped'
             : (res.isCorrect ? 'ans-badge--correct' : 'ans-badge--wrong');
           return (
             <span key={label} className={`ans-badge ${badgeClass} tf-badge-item`}>

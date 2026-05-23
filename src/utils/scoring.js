@@ -28,6 +28,7 @@ export function calculateScore(subjectId, userAnswers, correctAnswers) {
     let partCorrect = 0;
     let partWrong = 0;
     let partSkipped = 0;
+    let partPartial = 0;
 
     for (let i = 0; i < part.count; i++) {
       const qNum = questionIndex;
@@ -89,8 +90,13 @@ export function calculateScore(subjectId, userAnswers, correctAnswers) {
 
           qScore = part.scoring[correctCount] || 0;
           isCorrect = correctCount === part.statementsPerQuestion;
-          if (correctCount > 0) partCorrect++;
-          else partWrong++;
+          if (isCorrect) {
+            partCorrect++;
+          } else if (correctCount > 0) {
+            partPartial++;
+          } else {
+            partWrong++;
+          }
 
           details = {
             status: correctCount === 4 ? 'correct' : correctCount > 0 ? 'partial' : 'wrong',
@@ -146,6 +152,7 @@ export function calculateScore(subjectId, userAnswers, correctAnswers) {
       score: Math.round(partScore * 100) / 100,
       correct: partCorrect,
       wrong: partWrong,
+      partial: partPartial,
       skipped: partSkipped,
       total: part.count,
     };

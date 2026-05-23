@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useHistoryStore from '../../stores/historyStore';
 import { SUBJECTS } from '../../data/examConfig';
-import { BookX, Calendar, FileText, Clock, Eye, Brain, Sparkles, X } from 'lucide-react';
+import { BookX, Calendar, FileText, Clock, Eye, Brain, Sparkles, X, RotateCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -25,6 +25,26 @@ export default function ErrorLogPage() {
   const [questionAnalysis, setQuestionAnalysis] = useState('');
   const [questionAiLoading, setQuestionAiLoading] = useState(false);
   const [cachedPdfUrl, setCachedPdfUrl] = useState(null);
+  const [loadingStatus, setLoadingStatus] = useState('Đang kết nối với Gemini AI...');
+
+  useEffect(() => {
+    if (!questionAiLoading) return;
+    const statuses = [
+      'Đang đọc và phân tích đề bài từ PDF...',
+      'Đang đối chiếu phương án trả lời...',
+      'Đang tính toán lời giải chi tiết từng bước...',
+      'Đang xác định lỗi tư duy thường gặp...',
+      'Đang tối ưu hóa phương pháp giải nhanh...',
+      'Đang định hình khung kiến thức ôn tập...'
+    ];
+    let idx = 0;
+    setLoadingStatus(statuses[0]);
+    const interval = setInterval(() => {
+      idx = (idx + 1) % statuses.length;
+      setLoadingStatus(statuses[idx]);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [questionAiLoading]);
 
   // Extract and flatten all wrong/partial questions
   const errorLog = useMemo(() => {
@@ -93,10 +113,10 @@ export default function ErrorLogPage() {
   };
 
   const handleGenerateQuestionAnalysis = async (q) => {
-    let apiKey = localStorage.getItem('gemini_api_key');
+    let apiKey = localStorage.getItem('gemini_api_key') || localStorage.getItem('thpt_gemini_api_key');
     if (!apiKey) {
       try {
-        const settings = JSON.parse(localStorage.getItem('settings'));
+        const settings = JSON.parse(localStorage.getItem('thpt_settings') || localStorage.getItem('settings'));
         if (settings?.geminiApiKey) {
           apiKey = settings.geminiApiKey;
         }
@@ -421,12 +441,28 @@ export default function ErrorLogPage() {
                   ) : (
                     <div className="ai-content">
                       {questionAiLoading && (
-                        <div className="ai-content__loading">
-                          <Sparkles size={16} className="animate-spin" style={{ color: 'var(--color-math)', marginRight: '8px' }} />
-                          <span style={{ color: 'var(--color-math)', fontWeight: '500' }}>AI đang phân tích và giải thích...</span>
+                        <div className="ai-loading-container">
+                          <div className="ai-loading-brain">
+                            <Brain className="ai-loading-icon--brain" />
+                            <div className="ai-loading-pulse" />
+                            <Sparkles className="ai-loading-icon--sparkles" />
+                          </div>
+                          <div className="ai-loading-text-wrap">
+                            <span className="ai-loading-title">Trí tuệ nhân tạo đang phân tích</span>
+                            <span className="ai-loading-status">{loadingStatus}</span>
+                          </div>
                         </div>
                       )}
-                      {questionAnalysis && (
+                      {questionAnalysis && !questionAiLoading && (
+                        <div className="ai-content__header">
+                          <span className="ai-content__title">✨ Lời giải từ AI:</span>
+                          <button className="btn-ai-regenerate" onClick={() => handleGenerateQuestionAnalysis(selectedQuestion)} title="Giải thích lại bằng AI">
+                            <Brain size={16} className="btn-ai-regenerate__icon-ai" />
+                            <RotateCw size={14} className="btn-ai-regenerate__icon-refresh" />
+                          </button>
+                        </div>
+                      )}
+                      {questionAnalysis && !questionAiLoading && (
                         <div className="ai-content__text markdown-body">
                           <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
                             {questionAnalysis}
