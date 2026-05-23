@@ -65,6 +65,12 @@ export default function Sidebar() {
 
         <div className="sidebar__footer">
           <div className="sidebar__version">v1.0.0 • TNTHPTQG Prep</div>
+          <div className="sidebar__credit">
+            Made with ❤️ by{' '}
+            <a href="https://github.com/Qu4nh" target="_blank" rel="noopener noreferrer">
+              <span>Qu4nh</span>
+            </a>
+          </div>
         </div>
       </aside>
     </>
