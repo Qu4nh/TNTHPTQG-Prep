@@ -1,11 +1,12 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, History, BookOpen, Menu, X, Settings } from 'lucide-react';
+import { Home, History, BookOpen, Menu, X, Settings, BookX } from 'lucide-react';
 import { useState } from 'react';
 import './Sidebar.css';
 
 const NAV_ITEMS = [
   { path: '/', label: 'Trang chủ', icon: Home },
   { path: '/history', label: 'Lịch sử', icon: History },
+  { path: '/error-log', label: 'Câu làm sai', icon: BookX },
   { path: '/settings', label: 'Cài đặt', icon: Settings },
 ];
 

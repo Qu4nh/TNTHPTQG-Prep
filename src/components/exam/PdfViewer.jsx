@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { Upload, FileText, ZoomIn, ZoomOut, ChevronLeft, ChevronRight } from 'lucide-react';
 import './PdfViewer.css';
 
@@ -11,6 +11,12 @@ export default function PdfViewer({ examId, initialPdfUrl }) {
   const [pdfUrl, setPdfUrl] = useState(() => {
     return initialPdfUrl || sessionStorage.getItem('current_pdf') || null;
   });
+
+  useEffect(() => {
+    if (initialPdfUrl) {
+      setPdfUrl(initialPdfUrl);
+    }
+  }, [initialPdfUrl]);
   const [zoom, setZoom] = useState(100);
 
   const handleZoomIn = () => setZoom((z) => Math.min(z + 20, 200));
