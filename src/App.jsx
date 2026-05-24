@@ -6,6 +6,7 @@ import CheckPage from './pages/CheckPage/CheckPage';
 import ReviewPage from './pages/ReviewPage/ReviewPage';
 import HistoryPage from './pages/HistoryPage/HistoryPage';
 import ErrorLogPage from './pages/ErrorLogPage/ErrorLogPage';
+import FormulaPage from './pages/FormulaPage/FormulaPage';
 import SettingsPage from './pages/SettingsPage/SettingsPage';
 import './App.css';
 
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/review/:subjectId/:examId" element={<ReviewPage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/error-log" element={<ErrorLogPage />} />
+          <Route path="/formulas" element={<FormulaPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Routes>

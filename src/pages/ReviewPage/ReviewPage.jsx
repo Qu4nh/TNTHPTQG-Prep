@@ -7,7 +7,7 @@ import {
   CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 import { Trophy, Target, Clock, TrendingUp, Brain, ChevronLeft, Sparkles, X, Filter, RotateCw } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { generateOverallAnalysis, generateQuestionExplanation } from '../../services/aiService';
 import { loadPdf, loadAiCache, saveAiCache } from '../../services/localDbService';
 import ReactMarkdown from 'react-markdown';
@@ -217,10 +217,27 @@ export default function ReviewPage() {
     { name: 'Bỏ', value: result.totalSkipped },
   ];
 
-  const allQuestions = Object.values(result.questionResults || {}).sort((a, b) => a.questionNumber - b.questionNumber).map(q => ({
-    ...q,
-    isBookmarked: result.bookmarkedQuestions?.includes(q.questionNumber) || false
-  }));
+  const allQuestions = useMemo(() => {
+    if (!result || !result.questionResults) return [];
+    return Object.values(result.questionResults)
+      .sort((a, b) => a.questionNumber - b.questionNumber)
+      .map(q => ({
+        ...q,
+        isBookmarked: result.bookmarkedQuestions?.includes(q.questionNumber) || false
+      }));
+  }, [result]);
+
+  // Auto open question modal from query param
+  useEffect(() => {
+    if (!allQuestions || allQuestions.length === 0) return;
+    const qNum = queryParams.get('question');
+    if (qNum) {
+      const targetQ = allQuestions.find(q => String(q.questionNumber) === String(qNum));
+      if (targetQ) {
+        openQuestionDetail(targetQ);
+      }
+    }
+  }, [allQuestions, attemptId]);
 
   const barData = Object.values(result.partScores || {}).map((part) => {
     // Recalculate accurately from allQuestions to support old history data
