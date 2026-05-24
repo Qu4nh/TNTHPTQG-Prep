@@ -73,7 +73,7 @@ const useHistoryStore = create((set, get) => ({
     for (const sub of Object.values(bySubject)) {
       sub.average = Math.round((sub.totalScore / sub.count) * 10) / 10;
       
-      const recentScores = sub.scores.slice(0, 2);
+      const recentScores = sub.scores.slice(0, 3);
       sub.predictedScore = recentScores.reduce((sum, s) => sum + s.score, 0) / recentScores.length;
     }
 

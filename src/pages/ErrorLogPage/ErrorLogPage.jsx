@@ -367,7 +367,7 @@ export default function ErrorLogPage() {
                       </span>
                       <span 
                         className="error-card__meta-item error-card__meta-link"
-                        onClick={() => navigate(`/review/${error.subjectId}/${error.examId}`)}
+                        onClick={() => navigate(`/review/${error.subjectId}/${error.examId}?attempt=${error.submittedAt}`)}
                         style={{ cursor: 'pointer', textDecoration: 'underline' }}
                         title="Xem lại toàn bộ đề thi này"
                       >

@@ -215,7 +215,7 @@ export default function HistoryPage() {
                       <button
                         className="history-table__btn"
                         title="Xem lại"
-                        onClick={() => navigate(`/review/${r.subjectId}/${r.examId}`)}
+                        onClick={() => navigate(`/review/${r.subjectId}/${r.examId}?attempt=${r.submittedAt}`)}
                       >
                         <Eye size={16} />
                       </button>

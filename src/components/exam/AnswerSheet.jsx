@@ -1,6 +1,7 @@
 import { SUBJECTS } from '../../data/examConfig';
 import useExamStore from '../../stores/examStore';
 import { Bookmark, BookmarkCheck } from 'lucide-react';
+import ShortAnswerInput from '../ui/ShortAnswerInput';
 import './AnswerSheet.css';
 
 export default function AnswerSheet({ subjectId }) {
@@ -56,6 +57,7 @@ export default function AnswerSheet({ subjectId }) {
                 isBookmarked={bookmarkedQuestions.has(qNum)}
                 onChange={(val) => setAnswer(qNum, val)}
                 onToggleBookmark={() => toggleBookmark(qNum)}
+                subjectId={subjectId}
               />
             );
           }
@@ -180,7 +182,7 @@ function TrueFalseQuestion({ number, answer, onSelect, isBookmarked, onToggleBoo
 }
 
 /* Short Answer Component */
-function ShortAnswerQuestion({ number, answer, onChange, isBookmarked, onToggleBookmark }) {
+function ShortAnswerQuestion({ number, answer, onChange, isBookmarked, onToggleBookmark, subjectId }) {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       const nextQ = document.getElementById(`question-${number + 1}`);
@@ -205,14 +207,11 @@ function ShortAnswerQuestion({ number, answer, onChange, isBookmarked, onToggleB
         </button>
       </div>
       <div className="sa-input-wrap">
-        <input
-          type="text"
-          className="sa-input"
+        <ShortAnswerInput
           value={answer}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={onChange}
           onKeyDown={handleKeyDown}
-          placeholder="Nhập đáp án..."
-          autoComplete="off"
+          subjectId={subjectId}
         />
       </div>
     </div>

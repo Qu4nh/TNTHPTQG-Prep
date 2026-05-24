@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import useHistoryStore from '../../stores/historyStore';
 import { SUBJECTS } from '../../data/examConfig';
 import { formatTime, formatScore } from '../../utils/formatters';
@@ -15,6 +15,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import PdfViewer from '../../components/exam/PdfViewer';
+import ShortAnswerInput from '../../components/ui/ShortAnswerInput';
 import './ReviewPage.css';
 
 const CHART_COLORS = ['#10B981', '#EF4444', '#9CA3AF'];
@@ -22,7 +23,11 @@ const CHART_COLORS = ['#10B981', '#EF4444', '#9CA3AF'];
 export default function ReviewPage() {
   const { subjectId, examId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const history = useHistoryStore((s) => s.history);
+
+  const queryParams = new URLSearchParams(location.search);
+  const attemptId = queryParams.get('attempt');
 
   const [hasStartedAnalysis, setHasStartedAnalysis] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState('');
@@ -76,10 +81,10 @@ export default function ReviewPage() {
     return () => clearInterval(interval);
   }, [aiLoading]);
 
-  // Find the latest result for this exam
-  const result = history.find(
-    (r) => r.subjectId === subjectId && r.examId === examId
-  );
+  // Find the specific result if attemptId is provided, else the latest result for this exam
+  const result = attemptId
+    ? history.find((r) => r.subjectId === subjectId && r.examId === examId && r.submittedAt === attemptId)
+    : history.find((r) => r.subjectId === subjectId && r.examId === examId);
 
   const subject = SUBJECTS[subjectId];
 
@@ -436,10 +441,10 @@ export default function ReviewPage() {
                   </td>
                   <td className="text-muted">{q.partName}</td>
                   <td>
-                    {renderUserAnswer(q)}
+                    {renderUserAnswer(q, subject.id, true)}
                   </td>
                   <td>
-                    {renderCorrectAnswer(q)}
+                    {renderCorrectAnswer(q, subject.id, true)}
                   </td>
                   <td className="text-center font-bold" style={{ color: 'var(--color-math)' }}>
                     {q.score || 0}
@@ -489,13 +494,13 @@ export default function ReviewPage() {
                   <div className="question-compare__item">
                     <span className="question-compare__label">Bạn chọn:</span>
                     <span className="question-compare__value">
-                      {renderUserAnswer(selectedQuestion)}
+                      {renderUserAnswer(selectedQuestion, subjectId, false)}
                     </span>
                   </div>
                   <div className="question-compare__item">
                     <span className="question-compare__label">Đáp án đúng:</span>
                     <span className="question-compare__value">
-                      {renderCorrectAnswer(selectedQuestion)}
+                      {renderCorrectAnswer(selectedQuestion, subjectId, false)}
                     </span>
                   </div>
                   <div className={`question-compare__status status--${selectedQuestion.status}`}>
@@ -573,7 +578,17 @@ export default function ReviewPage() {
   );
 }
 
-function renderUserAnswer(q) {
+function renderUserAnswer(q, subjectId, compact = false) {
+  if (q.type === 'short_answer') {
+    return (
+      <ShortAnswerInput
+        value={q.userAnswer || ''}
+        disabled={true}
+        subjectId={subjectId}
+        compact={compact}
+      />
+    );
+  }
   if (q.type === 'true_false') {
     if (!q.statementResults) return <span className="ans-badge ans-badge--skipped">Chưa làm</span>;
     return (
@@ -595,8 +610,18 @@ function renderUserAnswer(q) {
   return <span className={`ans-badge ans-badge--${q.status}`}>{formatAnswer(q.userAnswer, q.type)}</span>;
 }
 
-function renderCorrectAnswer(q) {
+function renderCorrectAnswer(q, subjectId, compact = false) {
   if (!q.correctAnswer) return <span className="ans-badge ans-badge--skipped">Không có</span>;
+  if (q.type === 'short_answer') {
+    return (
+      <ShortAnswerInput
+        value={q.correctAnswer || ''}
+        disabled={true}
+        subjectId={subjectId}
+        compact={compact}
+      />
+    );
+  }
   if (q.type === 'true_false') {
     return (
       <div className="tf-answer-group">
