@@ -2,6 +2,7 @@ import { SUBJECTS } from '../../data/examConfig';
 import useExamStore from '../../stores/examStore';
 import { Bookmark, BookmarkCheck } from 'lucide-react';
 import ShortAnswerInput from '../ui/ShortAnswerInput';
+import gsap from 'gsap';
 import './AnswerSheet.css';
 
 export default function AnswerSheet({ subjectId }) {
@@ -87,7 +88,14 @@ export default function AnswerSheet({ subjectId }) {
 function MultipleChoiceQuestion({ number, answer, onSelect, isBookmarked, onToggleBookmark }) {
   const options = ['A', 'B', 'C', 'D'];
 
-  const handleSelect = (opt) => {
+  const handleSelect = (e, opt) => {
+    // Pro/Premium click effect: fast, sharp, subtle scale without wobble
+    const btn = e.currentTarget;
+    gsap.fromTo(btn,
+      { scale: 0.95 },
+      { scale: 1, duration: 0.25, ease: "power2.out", overwrite: "auto" }
+    );
+
     onSelect(opt);
     // Auto-scroll to next
     const nextQ = document.getElementById(`question-${number + 1}`);
@@ -96,13 +104,22 @@ function MultipleChoiceQuestion({ number, answer, onSelect, isBookmarked, onTogg
     }
   };
 
+  const handleBookmark = (e) => {
+    const icon = e.currentTarget;
+    gsap.fromTo(icon,
+      { scale: 0.85 },
+      { scale: 1, duration: 0.25, ease: "back.out(1.2)", overwrite: "auto" }
+    );
+    onToggleBookmark();
+  };
+
   return (
     <div id={`question-${number}`} className={`question-item ${answer ? 'question-item--answered' : ''}`}>
       <div className="question-item__header">
         <span className="question-item__number">Câu {number}</span>
         <button
           className={`question-item__bookmark ${isBookmarked ? 'question-item__bookmark--active' : ''}`}
-          onClick={onToggleBookmark}
+          onClick={handleBookmark}
           title="Đánh dấu câu này"
         >
           {isBookmarked ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
@@ -113,7 +130,7 @@ function MultipleChoiceQuestion({ number, answer, onSelect, isBookmarked, onTogg
           <button
             key={opt}
             className={`mc-option ${answer === opt ? 'mc-option--selected' : ''}`}
-            onClick={() => handleSelect(opt)}
+            onClick={(e) => handleSelect(e, opt)}
           >
             <span className="mc-option__letter">{opt}</span>
           </button>
@@ -128,7 +145,14 @@ function TrueFalseQuestion({ number, answer, onSelect, isBookmarked, onToggleBoo
   const labels = ['a', 'b', 'c', 'd'];
   const isFullyAnswered = Object.keys(answer).length === 4;
 
-  const handleSelect = (label, val) => {
+  const handleSelect = (e, label, val) => {
+    // Pro click effect
+    const btn = e.currentTarget;
+    gsap.fromTo(btn,
+      { scale: 0.92 },
+      { scale: 1, duration: 0.25, ease: "power2.out", overwrite: "auto" }
+    );
+
     onSelect(label, val);
     
     // Check if this is the last missing answer for this question
@@ -141,13 +165,22 @@ function TrueFalseQuestion({ number, answer, onSelect, isBookmarked, onToggleBoo
     }
   };
 
+  const handleBookmark = (e) => {
+    const icon = e.currentTarget;
+    gsap.fromTo(icon,
+      { scale: 0.85 },
+      { scale: 1, duration: 0.25, ease: "back.out(1.2)", overwrite: "auto" }
+    );
+    onToggleBookmark();
+  };
+
   return (
     <div id={`question-${number}`} className={`question-item ${isFullyAnswered ? 'question-item--answered' : ''}`}>
       <div className="question-item__header">
         <span className="question-item__number">Câu {number}</span>
         <button
           className={`question-item__bookmark ${isBookmarked ? 'question-item__bookmark--active' : ''}`}
-          onClick={onToggleBookmark}
+          onClick={handleBookmark}
           title="Đánh dấu câu này"
         >
           {isBookmarked ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
@@ -164,13 +197,13 @@ function TrueFalseQuestion({ number, answer, onSelect, isBookmarked, onToggleBoo
             <span className="tf-row__label">{label})</span>
             <button
               className={`tf-btn ${answer[label] === true ? 'tf-btn--selected tf-btn--true' : ''}`}
-              onClick={() => handleSelect(label, true)}
+              onClick={(e) => handleSelect(e, label, true)}
             >
               Đ
             </button>
             <button
               className={`tf-btn ${answer[label] === false ? 'tf-btn--selected tf-btn--false' : ''}`}
-              onClick={() => handleSelect(label, false)}
+              onClick={(e) => handleSelect(e, label, false)}
             >
               S
             </button>
@@ -194,13 +227,22 @@ function ShortAnswerQuestion({ number, answer, onChange, isBookmarked, onToggleB
     }
   };
 
+  const handleBookmark = (e) => {
+    const icon = e.currentTarget;
+    gsap.fromTo(icon,
+      { scale: 0.85 },
+      { scale: 1, duration: 0.25, ease: "back.out(1.2)", overwrite: "auto" }
+    );
+    onToggleBookmark();
+  };
+
   return (
     <div id={`question-${number}`} className={`question-item ${answer ? 'question-item--answered' : ''}`}>
       <div className="question-item__header">
         <span className="question-item__number">Câu {number}</span>
         <button
           className={`question-item__bookmark ${isBookmarked ? 'question-item__bookmark--active' : ''}`}
-          onClick={onToggleBookmark}
+          onClick={handleBookmark}
           title="Đánh dấu câu này"
         >
           {isBookmarked ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}

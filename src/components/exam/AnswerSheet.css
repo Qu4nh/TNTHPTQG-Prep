@@ -109,7 +109,6 @@
   padding: var(--space-1);
   border-radius: var(--radius-sm);
   color: var(--text-tertiary);
-  transition: color var(--transition-fast);
 }
 
 .question-item__bookmark:hover {
@@ -132,7 +131,6 @@
   border-radius: var(--radius-md);
   background: var(--bg-tertiary);
   text-align: center;
-  transition: all var(--transition-fast);
   border: 2px solid transparent;
 }
 
@@ -199,7 +197,6 @@
   font-weight: var(--weight-bold);
   color: var(--text-tertiary);
   border: 2px solid transparent;
-  transition: all var(--transition-fast);
   text-align: center;
 }
 

@@ -275,7 +275,7 @@ export const generateAnswerKey = async (subjectId, pdfBlobUrl, onProgress = () =
 
   // Model for MC: forced JSON output (simple questions, high accuracy)
   const modelJson = genAI.getGenerativeModel({
-    model: 'gemini-3-pro-preview',
+    model: 'gemini-3-flash-preview',
     generationConfig: {
       temperature: 0,
       topK: 1,
@@ -286,7 +286,7 @@ export const generateAnswerKey = async (subjectId, pdfBlobUrl, onProgress = () =
 
   // Model for TF/SA: free-form text output (Chain-of-Thought enabled)
   const modelThinking = genAI.getGenerativeModel({
-    model: 'gemini-3-pro-preview',
+    model: 'gemini-3-flash-preview',
     generationConfig: {
       temperature: 0,
       topK: 1,

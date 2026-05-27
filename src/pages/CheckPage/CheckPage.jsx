@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { SUBJECTS, SAMPLE_EXAMS } from '../../data/examConfig';
 import useExamStore from '../../stores/examStore';
 import useHistoryStore from '../../stores/historyStore';
@@ -39,6 +41,64 @@ export default function CheckPage() {
   const [aiDone, setAiDone] = useState(false);
   const [aiTimer, setAiTimer] = useState(0);
   const [aiAnswersBuffer, setAiAnswersBuffer] = useState({});
+  const containerRef = useRef(null);
+  const syncedAiKeysRef = useRef(new Set());
+
+  const { contextSafe } = useGSAP(() => {
+    if (!subject || !exam) return;
+    const tl = gsap.timeline();
+
+    tl.fromTo('.check-page__header',
+      { y: -30, opacity: 0, filter: 'blur(8px)' },
+      { y: 0, opacity: 1, filter: 'blur(0px)', duration: 0.7, ease: 'expo.out', clearProps: 'filter' },
+      0
+    );
+
+    tl.fromTo('.check-page__note',
+      { y: -20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', clearProps: 'transform,opacity' },
+      0.2
+    );
+
+    tl.fromTo('.check-page__section',
+      { y: 30, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.7, stagger: 0.15, ease: 'back.out(1.2)', clearProps: 'transform,opacity' },
+      0.3
+    );
+  }, { scope: containerRef, dependencies: [subjectId, examId] });
+
+  useGSAP(() => {
+    if (aiSolving) {
+      const widthPercent = aiProgress.total > 0 ? (aiProgress.current / aiProgress.total) * 100 : 0;
+      gsap.to('.ai-solve-progress__bar', {
+        width: `${widthPercent}%`,
+        duration: 0.5,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    }
+  }, { scope: containerRef, dependencies: [aiProgress, aiSolving] });
+
+  const handleHoverBtn = contextSafe((e, isHovering) => {
+    gsap.to(e.currentTarget, {
+      y: isHovering ? -2 : 0,
+      scale: isHovering ? 1.02 : 1,
+      boxShadow: isHovering ? '0 10px 25px -5px rgba(0,0,0,0.1)' : 'var(--shadow-sm)',
+      duration: 0.3,
+      ease: 'power2.out',
+      overwrite: 'auto'
+    });
+  });
+
+  const handleHoverBack = contextSafe((e, isHovering) => {
+    gsap.to(e.currentTarget, {
+      x: isHovering ? -4 : 0,
+      backgroundColor: isHovering ? 'var(--bg-tertiary)' : 'transparent',
+      duration: 0.3,
+      ease: 'power2.out',
+      overwrite: 'auto'
+    });
+  });
 
   useEffect(() => {
     let interval;
@@ -54,16 +114,32 @@ export default function CheckPage() {
 
   useEffect(() => {
     const bufferKeys = Object.keys(aiAnswersBuffer);
-    const customKeysKeys = Object.keys(customKeys);
     
-    if (bufferKeys.length > customKeysKeys.length) {
-      const nextKey = bufferKeys.find(k => !customKeys[k]);
-      if (nextKey) {
-        const timer = setTimeout(() => {
-          setCustomKeys(prev => ({ ...prev, [nextKey]: { ...aiAnswersBuffer[nextKey], isAI: true } }));
-        }, 300);
-        return () => clearTimeout(timer);
-      }
+    // Find the first key in buffer that we HAVEN'T synced to the UI yet during this AI run
+    const nextKey = bufferKeys.find(k => !syncedAiKeysRef.current.has(k));
+
+    if (nextKey) {
+      // Mark it as synced immediately so we don't loop
+      syncedAiKeysRef.current.add(nextKey);
+      const timer = setTimeout(() => {
+        setCustomKeys(prev => {
+          // If it's True/False, we merge the specific labels so we don't wipe out other labels if AI generated them sequentially
+          if (aiAnswersBuffer[nextKey].type === 'true_false') {
+            const currentCorrect = prev[nextKey]?.correct || {};
+            return {
+              ...prev,
+              [nextKey]: {
+                ...aiAnswersBuffer[nextKey],
+                isAI: true,
+                correct: { ...currentCorrect, ...aiAnswersBuffer[nextKey].correct }
+              }
+            };
+          }
+          // Otherwise, just overwrite
+          return { ...prev, [nextKey]: { ...aiAnswersBuffer[nextKey], isAI: true } };
+        });
+      }, 50); // Fast typewriter effect
+      return () => clearTimeout(timer);
     }
   }, [aiAnswersBuffer, customKeys]);
 
@@ -81,14 +157,16 @@ export default function CheckPage() {
     );
   }
 
-  const handleSetCustomKeyMC = (qNum, partId, value) => {
+  const handleSetCustomKeyMC = contextSafe((e, qNum, partId, value) => {
+    gsap.fromTo(e.currentTarget, { scale: 0.92 }, { scale: 1, duration: 0.25, ease: 'power2.out', overwrite: 'auto' });
     setCustomKeys(prev => ({
       ...prev,
       [qNum]: { type: 'multiple_choice', partId, correct: value }
     }));
-  };
+  });
 
-  const handleSetCustomKeyTF = (qNum, partId, label, value) => {
+  const handleSetCustomKeyTF = contextSafe((e, qNum, partId, label, value) => {
+    gsap.fromTo(e.currentTarget, { scale: 0.92 }, { scale: 1, duration: 0.25, ease: 'power2.out', overwrite: 'auto' });
     setCustomKeys(prev => {
       const current = prev[qNum]?.correct || {};
       return {
@@ -100,7 +178,7 @@ export default function CheckPage() {
         }
       };
     });
-  };
+  });
 
   const handleSetCustomKeySA = (qNum, partId, value) => {
     setCustomKeys(prev => ({
@@ -162,6 +240,7 @@ export default function CheckPage() {
     setAiDone(false);
     setAiProgress({ current: 0, total: subject.totalQuestions, partName: 'Đang chuẩn bị...' });
     setAiAnswersBuffer({});
+    syncedAiKeysRef.current.clear();
     setAiTimer(0);
 
     try {
@@ -191,9 +270,14 @@ export default function CheckPage() {
   let questionNumber = 1;
 
   return (
-    <div className="check-page">
+    <div className="check-page" ref={containerRef}>
       <div className="check-page__header">
-        <button className="check-page__back" onClick={() => navigate('/')}>
+        <button 
+          className="check-page__back" 
+          onClick={() => navigate('/')}
+          onMouseEnter={(e) => handleHoverBack(e, true)}
+          onMouseLeave={(e) => handleHoverBack(e, false)}
+        >
           <ChevronLeft size={20} />
           <span>Về trang chủ</span>
         </button>
@@ -207,6 +291,8 @@ export default function CheckPage() {
               className="check-page__ai-btn"
               onClick={handleAiSolve}
               disabled={aiSolving}
+              onMouseEnter={(e) => { if (!aiSolving) handleHoverBtn(e, true) }}
+              onMouseLeave={(e) => { if (!aiSolving) handleHoverBtn(e, false) }}
             >
               {aiSolving ? (
                 <>
@@ -223,12 +309,22 @@ export default function CheckPage() {
             </button>
           )}
           {isCustom ? (
-            <button className="check-page__review-btn check-page__review-btn--grade" onClick={handleGradeCustomExam}>
+            <button 
+              className="check-page__review-btn check-page__review-btn--grade" 
+              onClick={handleGradeCustomExam}
+              onMouseEnter={(e) => handleHoverBtn(e, true)}
+              onMouseLeave={(e) => handleHoverBtn(e, false)}
+            >
               <span>Chấm điểm</span>
               <ArrowRight size={16} />
             </button>
           ) : (
-            <button className="check-page__review-btn" onClick={() => navigate(`/review/${subjectId}/${examId}`)}>
+            <button 
+              className="check-page__review-btn" 
+              onClick={() => navigate(`/review/${subjectId}/${examId}`)}
+              onMouseEnter={(e) => handleHoverBtn(e, true)}
+              onMouseLeave={(e) => handleHoverBtn(e, false)}
+            >
               <span>Xem đánh giá</span>
               <ArrowRight size={16} />
             </button>
@@ -245,10 +341,8 @@ export default function CheckPage() {
             <span className="ai-solve-progress__count">{aiProgress.current}/{aiProgress.total}</span>
           </div>
           <div className="ai-solve-progress__bar-wrap">
-            <div
-              className="ai-solve-progress__bar"
-              style={{ width: `${aiProgress.total > 0 ? (aiProgress.current / aiProgress.total) * 100 : 0}%` }}
-            />
+            {/* GSAP will animate this width */}
+            <div className="ai-solve-progress__bar" />
           </div>
           <div className="ai-solve-progress__footer">
             <span className="ai-solve-progress__status">Đang xử lý: {aiProgress.partName}</span>
@@ -299,7 +393,7 @@ export default function CheckPage() {
                         <button
                           key={opt}
                           className={`check-item__input-btn ${answer?.correct === opt ? 'check-item__input-btn--active' : ''}`}
-                          onClick={() => handleSetCustomKeyMC(qNum, part.id, opt)}
+                          onClick={(e) => handleSetCustomKeyMC(e, qNum, part.id, opt)}
                         >
                           {opt}
                         </button>
@@ -327,13 +421,13 @@ export default function CheckPage() {
                             <span className="check-item__tf-label">{label})</span>
                             <button
                               className={`check-item__input-btn check-item__input-btn--true ${val === true ? 'check-item__input-btn--active' : ''}`}
-                              onClick={() => handleSetCustomKeyTF(qNum, part.id, label, true)}
+                              onClick={(e) => handleSetCustomKeyTF(e, qNum, part.id, label, true)}
                             >
                               Đ
                             </button>
                             <button
                               className={`check-item__input-btn check-item__input-btn--false ${val === false ? 'check-item__input-btn--active' : ''}`}
-                              onClick={() => handleSetCustomKeyTF(qNum, part.id, label, false)}
+                              onClick={(e) => handleSetCustomKeyTF(e, qNum, part.id, label, false)}
                             >
                               S
                             </button>

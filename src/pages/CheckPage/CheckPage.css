@@ -25,7 +25,6 @@
   font-weight: var(--weight-medium);
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
 }
 
 .check-page__back:hover {
@@ -53,12 +52,6 @@
   font-weight: var(--weight-semibold);
   font-size: var(--text-sm);
   box-shadow: var(--shadow-sm);
-  transition: all var(--transition-fast);
-}
-
-.check-page__review-btn:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
 }
 
 .check-page__note {
@@ -113,7 +106,6 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  animation: fadeIn var(--transition-base) ease-out;
 }
 
 .check-item--tf {
@@ -205,12 +197,6 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.check-item__input-btn:hover {
-  background: var(--bg-primary);
-  border-color: var(--text-tertiary);
 }
 
 .check-item__input-btn--active {
@@ -289,14 +275,8 @@
   font-weight: var(--weight-semibold);
   font-size: var(--text-sm);
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-  transition: all var(--transition-fast);
   border: none;
   cursor: pointer;
-}
-
-.check-page__ai-btn:hover:not(:disabled) {
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-  transform: translateY(-1px);
 }
 
 .check-page__ai-btn:disabled {
@@ -368,7 +348,6 @@
   background: linear-gradient(90deg, #8B5CF6, #6366F1, #8B5CF6);
   background-size: 200% 100%;
   border-radius: var(--radius-full);
-  transition: width 0.5s ease-out;
   animation: shimmer 2s linear infinite;
 }
 
