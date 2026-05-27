@@ -353,6 +353,13 @@ Ví dụ: [{"q": 1, "answer": "A"}, {"q": 2, "answer": "C"}]
 CHỈ trả về JSON array, KHÔNG viết gì khác.`;
 
     } else if (part.type === 'true_false') {
+      let tfHints = '';
+      if (subject.id === 'math') {
+        tfHints = '- Với bài HÌNH HỌC KHÔNG GIAN: Đặt hệ tọa độ Oxyz, tính toán bằng vector và tích vô hướng/tích có hướng. KHÔNG suy luận bằng trực giác hình học.';
+      } else if (subject.id === 'physics') {
+        tfHints = '- Cẩn thận với các định lý, công thức vật lý và đơn vị đo lường. Chú ý các điều kiện lý tưởng (bỏ qua ma sát, điện trở dây nối, v.v.).';
+      }
+
       prompt = `Bạn là chuyên gia giải đề thi THPT Quốc gia môn ${subject.name} với độ chính xác tuyệt đối.
 
 NHIỆM VỤ: Giải các câu Đúng/Sai từ Câu ${qStart} đến Câu ${qEnd} trong file PDF đề thi đính kèm. Mỗi câu có 4 mệnh đề (a, b, c, d).
@@ -368,25 +375,16 @@ CHỈ DẪN ĐỘ CHÍNH XÁC:
 - Cẩn thận TUYỆT ĐỐI với các từ khóa bẫy: "luôn", "mọi", "chỉ khi", "khi và chỉ khi", "tồn tại", "duy nhất".
 - Nếu mệnh đề chứa từ "luôn đúng" hoặc "mọi" → tìm PHẢN VÍ DỤ. Nếu tìm được 1 phản ví dụ → SAI.
 - Nếu mệnh đề chứa từ "tồn tại" → chỉ cần TÌM 1 VÍ DỤ thỏa mãn → ĐÚNG.
-- Với bài HÌNH HỌC KHÔNG GIAN: Đặt hệ tọa độ Oxyz, tính toán bằng vector và tích vô hướng/tích có hướng. KHÔNG suy luận bằng trực giác hình học.
+${tfHints}
 - Tự kiểm chứng lại kết luận bằng cách xem xét trường hợp biên hoặc đặc biệt.
 
 Sau khi phân tích xong TẤT CẢ các mệnh đề, trả về kết quả cuối cùng dưới dạng JSON array:
 [{"q": <số câu>, "a": <true/false>, "b": <true/false>, "c": <true/false>, "d": <true/false>}]`;
 
     } else if (part.type === 'short_answer') {
-      prompt = `Bạn là chuyên gia giải đề thi THPT Quốc gia môn ${subject.name} với độ chính xác tuyệt đối.
-
-NHIỆM VỤ: Giải các câu Trả lời ngắn từ Câu ${qStart} đến Câu ${qEnd} trong file PDF đề thi đính kèm.
-
-QUY TRÌNH BẮT BUỘC - GIẢI CHI TIẾT TỪNG BƯỚC:
-Với MỖI câu, bạn PHẢI:
-1. Xác định dạng bài (hàm số, tích phân, hình học không gian, xác suất, lượng giác, v.v.)
-2. Viết ra TOÀN BỘ phép tính trung gian, từng bước một, KHÔNG được bỏ qua bước nào.
-3. Tính ra kết quả cuối cùng.
-4. TỰ KIỂM CHỨNG bằng cách thay ngược kết quả vào bài gốc hoặc tính lại bằng phương pháp khác.
-
-HƯỚNG DẪN ĐẶC BIỆT CHO CÁC DẠNG KHÓ:
+      let saHints = '';
+      if (subject.id === 'math') {
+        saHints = `HƯỚNG DẪN ĐẶC BIỆT CHO MÔN TOÁN:
 
 🔷 HÌNH HỌC KHÔNG GIAN:
 - BẮT BUỘC đặt hệ tọa độ Oxyz. Xác định tọa độ tất cả các đỉnh liên quan.
@@ -404,7 +402,36 @@ HƯỚNG DẪN ĐẶC BIỆT CHO CÁC DẠNG KHÓ:
 
 🔷 TÍCH PHÂN & ĐẠO HÀM:
 - Viết rõ từng bước biến đổi, đặt ẩn phụ nếu cần.
-- Kiểm tra kết quả bằng cách đạo hàm ngược (với tích phân) hoặc thay số (với đạo hàm).
+- Kiểm tra kết quả bằng cách đạo hàm ngược (với tích phân) hoặc thay số (với đạo hàm).`;
+      } else if (subject.id === 'physics') {
+        saHints = `HƯỚNG DẪN ĐẶC BIỆT CHO MÔN VẬT LÝ:
+
+🔷 DAO ĐỘNG CƠ & SÓNG CƠ:
+- Viết phương trình dao động/sóng, chú ý pha ban đầu và đơn vị (cm, m, rad/s). 
+- Dùng đường tròn lượng giác để giải quyết các bài toán về thời gian và quãng đường.
+
+🔷 DÒNG ĐIỆN XOAY CHIỀU:
+- Vẽ giản đồ vector hoặc sử dụng số phức (phương pháp chuẩn hóa số liệu) để giải nhanh hệ phương trình điện áp/dòng điện.
+- Chú ý sự lệch pha giữa u và i trên từng phần tử R, L, C.
+
+🔷 VẬT LÝ HẠT NHÂN & LƯỢNG TỬ ÁNH SÁNG:
+- Chú ý đổi đơn vị giữa eV, MeV, J, u, kg. Đặc biệt là MeV/c².
+- Áp dụng nghiêm ngặt định luật bảo toàn động lượng và bảo toàn năng lượng toàn phần (chú ý động năng K).
+- Với bài giao thoa ánh sáng: Vẽ trục tọa độ vân sáng/vân tối để đếm số vân chính xác.`;
+      }
+
+      prompt = `Bạn là chuyên gia giải đề thi THPT Quốc gia môn ${subject.name} với độ chính xác tuyệt đối.
+
+NHIỆM VỤ: Giải các câu Trả lời ngắn từ Câu ${qStart} đến Câu ${qEnd} trong file PDF đề thi đính kèm.
+
+QUY TRÌNH BẮT BUỘC - GIẢI CHI TIẾT TỪNG BƯỚC:
+Với MỖI câu, bạn PHẢI:
+1. Xác định dạng bài (hàm số, tích phân, hình học không gian, xác suất, lượng giác, v.v. đối với Toán; dao động, dòng điện, hạt nhân, v.v. đối với Lý)
+2. Viết ra TOÀN BỘ phép tính trung gian, từng bước một, KHÔNG được bỏ qua bước nào.
+3. Tính ra kết quả cuối cùng.
+4. TỰ KIỂM CHỨNG bằng cách thay ngược kết quả vào bài gốc hoặc tính lại bằng phương pháp khác.
+
+${saHints}
 
 QUY TẮC ĐỊNH DẠNG ĐÁP ÁN:
 - Đáp án là giá trị số, sử dụng dấu phẩy ',' làm ngăn cách thập phân (chuẩn Việt Nam). Ví dụ: 2,5 thay vì 2.5.

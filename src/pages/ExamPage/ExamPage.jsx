@@ -5,7 +5,7 @@ import useHistoryStore from '../../stores/historyStore';
 import { SUBJECTS } from '../../data/examConfig';
 import { formatTime } from '../../utils/formatters';
 import AnswerSheet from '../../components/exam/AnswerSheet';
-import PdfViewer from '../../components/exam/PdfViewer';
+import PdfAnnotator from '../../components/exam/PdfAnnotator';
 import { Clock, Send, AlertTriangle, ChevronLeft } from 'lucide-react';
 import { useState, useRef } from 'react';
 import './ExamPage.css';
@@ -134,7 +134,7 @@ export default function ExamPage() {
       {/* Main content - Two column layout: PDF left + Answer Sheet right */}
       <div className="exam-page__content">
         <div className="exam-page__pdf-panel">
-          <PdfViewer examId={examId} />
+          <PdfAnnotator examId={examId} />
         </div>
         <div className="exam-page__answer-panel">
           <AnswerSheet subjectId={subjectId} />
