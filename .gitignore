@@ -42,3 +42,6 @@ build/
 
 # Ignore the .gitignore file itself
 .gitignore
+
+# Skills Lock File
+skills-lock.json

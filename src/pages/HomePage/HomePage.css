@@ -27,7 +27,6 @@
   padding: var(--space-6);
   position: relative;
   overflow: hidden;
-  transition: all var(--transition-base);
 }
 
 .home__hero-title-card {
@@ -158,12 +157,6 @@
   pointer-events: none;
   z-index: 0;
   transform: rotate(-15deg);
-  transition: transform var(--transition-base), opacity var(--transition-base);
-}
-
-.home__hero-card:hover .home__hero-bg-icon {
-  transform: rotate(0deg) scale(1.05);
-  opacity: 0.08;
 }
 
 /* Inactive Streak Card */
@@ -220,19 +213,11 @@
   border-radius: var(--radius-2xl);
   padding: var(--space-6) var(--space-6) var(--space-8);
   box-shadow: var(--shadow-sm);
-  transition: all var(--transition-spring);
-  animation: fadeInUp 500ms ease-out both;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   height: 100%;
-}
-
-.subject-card:hover {
-  box-shadow: var(--subject-glow);
-  transform: translateY(-6px);
-  border-color: transparent;
 }
 
 .subject-card__header {
@@ -295,11 +280,6 @@
   min-width: 80px;
   min-height: 64px;
   text-align: center;
-  transition: transform var(--transition-fast);
-}
-
-.subject-card:hover .subject-card__part {
-  transform: scale(1.02);
 }
 
 .subject-card__part-name {
@@ -320,7 +300,6 @@
 /* Upload Section */
 .home__upload-section {
   margin-bottom: var(--space-10);
-  animation: fadeInUp 400ms ease-out;
 }
 
 .home__upload-box {
@@ -335,7 +314,6 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   cursor: pointer;
-  transition: all var(--transition-base);
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -352,11 +330,11 @@
   pointer-events: none;
 }
 
-.home__upload-box:hover::before, .home__upload-box--dragging::before {
+.home__upload-box--dragging::before {
   opacity: 1;
 }
 
-.home__upload-box:hover, .home__upload-box--dragging {
+.home__upload-box--dragging {
   border-color: var(--color-math);
   transform: translateY(-2px);
   box-shadow: var(--shadow-glow-math);
@@ -440,7 +418,6 @@
   border-radius: var(--radius-lg);
   font-size: var(--text-base);
   font-weight: var(--weight-bold);
-  transition: all var(--transition-spring);
   cursor: pointer;
   border: none;
   outline: none;
@@ -456,11 +433,6 @@
   top: 0; left: -100%; width: 50%; height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
   transition: all 0.5s ease;
-}
-
-.exam-item__btn--start:hover {
-  box-shadow: 0 8px 25px -5px var(--subject-color);
-  transform: translateY(-2px) scale(1.02);
 }
 
 .exam-item__btn--start:hover::after {
