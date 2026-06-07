@@ -8,6 +8,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import PdfViewer from '../../components/exam/PdfViewer';
+import ApiKeyModal from '../../components/ui/ApiKeyModal';
 import { loadPdf, loadAiCache, saveAiCache } from '../../services/localDbService';
 import { generateQuestionExplanation } from '../../services/aiService';
 import './ErrorLogPage.css';
@@ -26,6 +27,9 @@ export default function ErrorLogPage() {
   const [questionAiLoading, setQuestionAiLoading] = useState(false);
   const [cachedPdfUrl, setCachedPdfUrl] = useState(null);
   const [loadingStatus, setLoadingStatus] = useState('Đang kết nối với Gemini AI...');
+
+  const [showApiModal, setShowApiModal] = useState(false);
+  const [pendingAiAction, setPendingAiAction] = useState(null);
 
   useEffect(() => {
     if (!questionAiLoading) return;
@@ -123,12 +127,9 @@ export default function ErrorLogPage() {
       } catch (e) {}
     }
     if (!apiKey) {
-      apiKey = window.prompt('Để sử dụng AI, vui lòng nhập Google Gemini API Key của bạn:\n(Hoàn toàn miễn phí, bạn có thể lấy tại aistudio.google.com)');
-      if (apiKey) {
-        localStorage.setItem('gemini_api_key', apiKey.trim());
-      } else {
-        return;
-      }
+      setPendingAiAction(() => () => handleGenerateQuestionAnalysis(q));
+      setShowApiModal(true);
+      return;
     }
 
     setQuestionAiLoading(true);
@@ -462,13 +463,34 @@ export default function ErrorLogPage() {
                           </button>
                         </div>
                       )}
-                      {questionAnalysis && !questionAiLoading && (
-                        <div className="ai-content__text markdown-body">
-                          <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                            {questionAnalysis}
-                          </ReactMarkdown>
-                        </div>
-                      )}
+                      {questionAnalysis && !questionAiLoading && (() => {
+                        let displayAnalysis = questionAnalysis;
+                        let searchQuery = `Câu ${selectedQuestion.questionNumber} ${selectedQuestion.examName}`;
+                        const searchMatch = questionAnalysis.match(/SEARCH_QUERY:\s*(.*)/i);
+                        if (searchMatch) {
+                          searchQuery = searchMatch[1].trim().replace(/^["']|["']$/g, '');
+                          displayAnalysis = questionAnalysis.replace(/SEARCH_QUERY:\s*(.*)/i, '').trim();
+                        }
+
+                        return (
+                          <div className="ai-content__text markdown-body">
+                            <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                              {displayAnalysis}
+                            </ReactMarkdown>
+
+                            <div className="ai-content__actions">
+                              <a
+                                href={`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn-google-search"
+                              >
+                                🔍 Tìm kiếm câu này trên Google
+                              </a>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
                 </div>
@@ -478,6 +500,19 @@ export default function ErrorLogPage() {
         </div>
       )}
 
+      <ApiKeyModal 
+        isOpen={showApiModal} 
+        onClose={() => {
+          setShowApiModal(false);
+          setPendingAiAction(null);
+        }} 
+        onSubmit={(key) => {
+          localStorage.setItem('gemini_api_key', key);
+          setShowApiModal(false);
+          if (pendingAiAction) pendingAiAction();
+          setPendingAiAction(null);
+        }} 
+      />
     </div>
   );
 }

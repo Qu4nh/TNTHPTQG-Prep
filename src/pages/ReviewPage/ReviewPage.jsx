@@ -16,6 +16,7 @@ import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import PdfViewer from '../../components/exam/PdfViewer';
 import ShortAnswerInput from '../../components/ui/ShortAnswerInput';
+import ApiKeyModal from '../../components/ui/ApiKeyModal';
 import './ReviewPage.css';
 
 const CHART_COLORS = ['#10B981', '#EF4444', '#9CA3AF'];
@@ -38,6 +39,9 @@ export default function ReviewPage() {
   const [questionAiLoading, setQuestionAiLoading] = useState(false);
 
   const [filter, setFilter] = useState('all');
+
+  const [showApiModal, setShowApiModal] = useState(false);
+  const [pendingAiAction, setPendingAiAction] = useState(null);
 
   // Cached PDF URL from IndexedDB
   const [cachedPdfUrl, setCachedPdfUrl] = useState(null);
@@ -121,12 +125,9 @@ export default function ReviewPage() {
       } catch (e) { }
     }
     if (!apiKey) {
-      apiKey = window.prompt('Để sử dụng AI, vui lòng nhập Google Gemini API Key của bạn:\n(Hoàn toàn miễn phí, bạn có thể lấy tại aistudio.google.com)');
-      if (apiKey) {
-        localStorage.setItem('gemini_api_key', apiKey.trim());
-      } else {
-        return;
-      }
+      setPendingAiAction(() => () => handleGenerateAiAnalysis(examResult));
+      setShowApiModal(true);
+      return;
     }
 
     setHasStartedAnalysis(true);
@@ -159,12 +160,9 @@ export default function ReviewPage() {
       } catch (e) { }
     }
     if (!apiKey) {
-      apiKey = window.prompt('Để sử dụng AI, vui lòng nhập Google Gemini API Key của bạn:\n(Hoàn toàn miễn phí, bạn có thể lấy tại aistudio.google.com)');
-      if (apiKey) {
-        localStorage.setItem('gemini_api_key', apiKey.trim());
-      } else {
-        return;
-      }
+      setPendingAiAction(() => () => handleGenerateQuestionAnalysis(q));
+      setShowApiModal(true);
+      return;
     }
 
     setQuestionAiLoading(true);
@@ -591,6 +589,20 @@ export default function ReviewPage() {
           </div>
         </div>
       )}
+
+      <ApiKeyModal 
+        isOpen={showApiModal} 
+        onClose={() => {
+          setShowApiModal(false);
+          setPendingAiAction(null);
+        }} 
+        onSubmit={(key) => {
+          localStorage.setItem('gemini_api_key', key);
+          setShowApiModal(false);
+          if (pendingAiAction) pendingAiAction();
+          setPendingAiAction(null);
+        }} 
+      />
     </div>
   );
 }

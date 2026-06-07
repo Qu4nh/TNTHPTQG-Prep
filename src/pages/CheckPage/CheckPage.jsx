@@ -9,6 +9,7 @@ import { savePdf } from '../../services/localDbService';
 import { generateAnswerKey } from '../../services/aiService';
 import { CheckCircle2, ArrowRight, ChevronLeft, KeyRound, Brain, Sparkles, Loader2, Timer } from 'lucide-react';
 import ShortAnswerInput from '../../components/ui/ShortAnswerInput';
+import ApiKeyModal from '../../components/ui/ApiKeyModal';
 import './CheckPage.css';
 
 export default function CheckPage() {
@@ -41,6 +42,7 @@ export default function CheckPage() {
   const [aiDone, setAiDone] = useState(false);
   const [aiTimer, setAiTimer] = useState(0);
   const [aiAnswersBuffer, setAiAnswersBuffer] = useState({});
+  const [showApiModal, setShowApiModal] = useState(false);
   const containerRef = useRef(null);
   const syncedAiKeysRef = useRef(new Set());
 
@@ -221,12 +223,8 @@ export default function CheckPage() {
       } catch (e) { }
     }
     if (!apiKey) {
-      apiKey = window.prompt('Để sử dụng AI giải đề, vui lòng nhập Google Gemini API Key:\n(Miễn phí tại aistudio.google.com)');
-      if (apiKey) {
-        localStorage.setItem('gemini_api_key', apiKey.trim());
-      } else {
-        return;
-      }
+      setShowApiModal(true);
+      return;
     }
 
     const pdfBlobUrl = sessionStorage.getItem('current_pdf');
@@ -482,6 +480,16 @@ export default function CheckPage() {
           );
         })}
       </div>
+
+      <ApiKeyModal 
+        isOpen={showApiModal} 
+        onClose={() => setShowApiModal(false)} 
+        onSubmit={(key) => {
+          localStorage.setItem('gemini_api_key', key);
+          setShowApiModal(false);
+          handleAiSolve();
+        }} 
+      />
     </div>
   );
 }
