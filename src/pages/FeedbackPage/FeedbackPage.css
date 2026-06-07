@@ -1,0 +1,190 @@
+/* ============================================
+   FEEDBACK PAGE - Premium UI
+   ============================================ */
+
+.feedback-page {
+  padding: var(--space-6);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.feedback-page__header {
+  margin-bottom: var(--space-6);
+  text-align: center;
+}
+
+.feedback-page__title {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.feedback-page__subtitle {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+}
+
+.feedback-card {
+  background: var(--surface-glass);
+  border: 1px solid var(--surface-glass-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.feedback-form__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.feedback-form__label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+}
+
+.feedback-form__input,
+.feedback-form__textarea {
+  width: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--surface-glass-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--text-base);
+  transition: all var(--transition-fast);
+}
+
+.feedback-form__input:focus,
+.feedback-form__textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: var(--bg-primary);
+}
+
+.feedback-form__textarea {
+  resize: vertical;
+  min-height: 150px;
+}
+
+.feedback-form__submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-top: var(--space-2);
+}
+
+.feedback-form__submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+}
+
+.feedback-form__submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.feedback-success {
+  text-align: center;
+  padding: var(--space-8) 0;
+}
+
+.feedback-success__icon {
+  color: var(--color-success);
+  margin-bottom: var(--space-4);
+}
+
+.feedback-success__title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.feedback-success__desc {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-6);
+}
+
+.feedback-success__back {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  border: 1px solid var(--surface-glass-border);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.feedback-success__back:hover {
+  background: var(--bg-secondary);
+}
+
+.feedback-rating {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.feedback-rating__stars {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.feedback-rating__star-wrapper {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.feedback-rating__star-wrapper:hover {
+  transform: scale(1.2);
+}
+
+.feedback-rating__star {
+  color: var(--text-tertiary);
+  transition: all var(--transition-fast);
+}
+
+.feedback-rating__star--filled,
+.feedback-rating__star--half {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #fbbf24;
+  fill: #fbbf24;
+  pointer-events: none;
+}
+
+.feedback-rating__star--half {
+  clip-path: inset(0 50% 0 0);
+}

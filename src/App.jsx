@@ -8,6 +8,7 @@ import HistoryPage from './pages/HistoryPage/HistoryPage';
 import ErrorLogPage from './pages/ErrorLogPage/ErrorLogPage';
 import FormulaPage from './pages/FormulaPage/FormulaPage';
 import SettingsPage from './pages/SettingsPage/SettingsPage';
+import FeedbackPage from './pages/FeedbackPage/FeedbackPage';
 import './App.css';
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/error-log" element={<ErrorLogPage />} />
           <Route path="/formulas" element={<FormulaPage />} />
+          <Route path="/feedback" element={<FeedbackPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Routes>

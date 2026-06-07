@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, History, BookOpen, Menu, X, Settings, BookX, FunctionSquare } from 'lucide-react';
+import { Home, History, BookOpen, Menu, X, Settings, BookX, FunctionSquare, MessageSquare } from 'lucide-react';
 import { useState } from 'react';
 import './Sidebar.css';
 
@@ -63,6 +63,17 @@ export default function Sidebar() {
               </NavLink>
             );
           })}
+          
+          <div style={{ marginTop: 'auto' }}>
+            <NavLink
+              to="/feedback"
+              className={({isActive}) => `sidebar__link ${isActive ? 'sidebar__link--active' : ''}`}
+              onClick={closeMobile}
+            >
+              <MessageSquare className="sidebar__link-icon" size={20} />
+              <span>Góp ý</span>
+            </NavLink>
+          </div>
         </nav>
 
         <div className="sidebar__footer">
